@@ -1,19 +1,28 @@
 import express from 'express'
 import { client } from '../../lib/mongoClient.js'
 import { harvensineDistance } from '../../lib/harvenrsine.js'
+import console from 'console'
 export const router = express.Router()
 
-
 router.get('/', async (req, res) => {
-    console.time()
-    let response = await getStationByCoords(Number(req.query.lat), Number(req.query.lon))
-    res.send(response)
-    console.log(response)
     console.log(req.query)
-    console.timeEnd()
+    if (!req.query.lat || !req.query.lon) {
+        res.send({ error: "Missing Latitude or Longitude" })
+        return
+    }
+    const query = {
+        lat: Number(req.query.lat),
+        lon: Number(req.query.lon),
+        ...(req.query.includeYears && {
+            includeYears: String(req.query.includeYears).split(',')
+        })
+    }
+    let response = await getStationByCoords(query)
+    res.send(response)
+
 })
 
-async function isInUS([lon,lat] : number[]) {
+async function isInUS([lon, lat]: number[]) {
     await client.connect()
     const db = client.db('USGeoData')
     const collection = db.collection('stations')
@@ -22,17 +31,22 @@ async function isInUS([lon,lat] : number[]) {
             '$geoIntersects': {
                 '$geometry': {
                     'type': 'Point',
-                    'coordinates': [lon,lat]
+                    'coordinates': [lon, lat]
                 }
             }
         }
     }
     const result = await collection.find(query).toArray()
     return result.length >= 1 ? true : false
-
 }
 
-async function getStationByCoords(lat: number, lon: number) {
+interface stationLookupParams {
+    lat: number,
+    lon: number,
+    includeYears?: string[]
+}
+
+async function getStationByCoords(params: stationLookupParams) {
     await client.connect()
     const db = client.db('USGeoData')
     const collection = db.collection('stations')
@@ -41,16 +55,22 @@ async function getStationByCoords(lat: number, lon: number) {
             '$near': {
                 '$geometry': {
                     'type': 'Point',
-                    'coordinates': [lon, lat]
+                    'coordinates': [params.lon, params.lat]
                 }
             }
-        }
+        },
+        ...(params.includeYears && {
+            "files.year": {
+                "$in": params.includeYears
+            }
+        })
+
     }
 
     let result = await collection.find(query).limit(5).toArray()
     return result.map(station => {
         // add the distance from the supplied lat/lon to the response
-        station.distance = harvensineDistance([lat, lon], station.loc.coordinates.reverse())
+        station.distance = harvensineDistance([params.lon, params.lat], station.loc.coordinates.reverse())
         return station
     })
 }
