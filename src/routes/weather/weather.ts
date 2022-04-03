@@ -7,8 +7,8 @@ router.get('/:id', async (req, res) => {
         id: req.params.id,
         start: Number(req.query.start),
         end: Number(req.query.end),
-        ...(req.query.maxTemp && {maxTemp: Number(req.query.maxTemp)}),
-        ...(req.query.minTemp && {maxTemp: Number(req.query.minTemp)})
+        ...(req.query.maxTemp && { maxTemp: Number(req.query.maxTemp) }),
+        ...(req.query.minTemp && { maxTemp: Number(req.query.minTemp) })
     }
     const maxSearchDays = 31
     const searchLength = (query.end - query.start) / 86400
@@ -46,10 +46,10 @@ async function getDataBetweenDates(param: DataParams) {
     const collection = db.collection(param.id)
     console.log(param)
     const filter = {
-        ...((param.minTemp || param.maxTemp) && {
+        ...((param.minTemp != undefined || param.maxTemp != undefined) && {
             'temp.temp': {
-                ...(param.maxTemp && { '$lt': param.maxTemp }),
-                ...(param.minTemp && { '$gt': param.minTemp })
+                ...(param.maxTemp != undefined && { '$lt': param.maxTemp }),
+                ...(param.minTemp != undefined && { '$gt': param.minTemp })
             }
         }),
         'timestamp': {

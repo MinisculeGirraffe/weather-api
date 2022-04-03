@@ -10,6 +10,7 @@ router.get('/', async (req, res) => {
         res.send({ error: "Missing Latitude or Longitude" })
         return
     }
+
     const query = {
         lat: Number(req.query.lat),
         lon: Number(req.query.lon),
@@ -70,7 +71,7 @@ async function getStationByCoords(params: stationLookupParams) {
     let result = await collection.find(query).limit(5).toArray()
     return result.map(station => {
         // add the distance from the supplied lat/lon to the response
-        station.distance = harvensineDistance([params.lon, params.lat], station.loc.coordinates.reverse())
+        station.distance = harvensineDistance([params.lon, params.lat], station.loc.coordinates)
         return station
     })
 }

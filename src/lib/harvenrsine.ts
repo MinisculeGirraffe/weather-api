@@ -14,5 +14,5 @@ export function harvensineDistance([lon1,lat1]: number[],[lon2,lat2]: number[], 
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c;
     if (isMiles) d /= 1.60934;
-    return d.toFixed(2)
+    return d
 }
