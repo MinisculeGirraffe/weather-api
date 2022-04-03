@@ -1,6 +1,6 @@
 import express from 'express'
-import {router as weatherRouter} from './weather/index.js'
-import {router as lookupRouter} from './lookup/index.js'
+import {router as weatherRouter} from './weather/weather.js'
+import {router as lookupRouter} from './lookup/lookup.js'
 
 export const apiRouter = express.Router()
 
