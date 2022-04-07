@@ -41,7 +41,7 @@ interface DataParams {
     maxTemp?: number
 }
 async function getDataBetweenDates(param: DataParams) {
-    await client.connect()
+    await client
     const db = client.db('WeatherDatabase')
     const collection = db.collection(param.id)
     console.log(param)

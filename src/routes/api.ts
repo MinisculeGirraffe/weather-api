@@ -1,4 +1,5 @@
 import express from 'express'
+
 import {router as weatherRouter} from './weather/weather.js'
 import {router as lookupRouter} from './lookup/lookup.js'
 import {router as stationRouter} from './station/station.js'
