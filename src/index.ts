@@ -3,7 +3,7 @@ import express from 'express'
 import helmet from "helmet";
 import rateLimit from 'express-rate-limit'
 import mongoSanitize from "express-mongo-sanitize"
-
+import morgan from "morgan"
 
 import {apiRouter} from './routes/api.js'
 
@@ -17,10 +17,12 @@ const limiter = rateLimit({
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })
 app.use(limiter)
-app.use(mongoSanitize)
+app.use(mongoSanitize({allowDots: true}))
 
 app.use(express.json({ limit: '1mb' }))
 app.use(helmet())
+app.use(morgan("common"))
+
 app.use('/api',apiRouter)
 
 app.get('/', (req,res) => {

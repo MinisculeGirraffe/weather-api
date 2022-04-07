@@ -24,12 +24,8 @@ router.get('/:id', async (req, res) => {
         })
         return
     }
-
     const response = await getDataBetweenDates(query)
-
     res.send(response)
-    console.log(`${req.method} - Station ${query.id} for ${searchLength} days`)
-
 })
 
 // start and end date in unix time
@@ -41,10 +37,9 @@ interface DataParams {
     maxTemp?: number
 }
 async function getDataBetweenDates(param: DataParams) {
-    await client
+    await client.connect()
     const db = client.db('WeatherDatabase')
     const collection = db.collection(param.id)
-    console.log(param)
     const filter = {
         ...((param.minTemp != undefined || param.maxTemp != undefined) && {
             'temp.temp': {
@@ -57,6 +52,5 @@ async function getDataBetweenDates(param: DataParams) {
             '$lte': new Date(param.end * 1000)
         }
     }
-    console.log(filter)
     return collection.find(filter).toArray()
 }
